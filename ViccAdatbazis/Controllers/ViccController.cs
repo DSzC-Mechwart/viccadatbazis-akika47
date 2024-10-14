@@ -12,14 +12,14 @@ namespace ViccAdatbazis.Controllers
 
         private readonly ViccDbContext _context;
 
-        public ViccController(ViccDbContext context) 
+        public ViccController(ViccDbContext context)
         {
             _context = context;
         }
         //Viccek lekérdezése
 
         [HttpGet]
-        public async Task<ActionResult<List<Vicc>>> GetViccek() 
+        public async Task<ActionResult<List<Vicc>>> GetViccek()
         {
             return await _context.Viccek.Where(x => x.Aktiv).ToListAsync();
         }
@@ -82,7 +82,7 @@ namespace ViccAdatbazis.Controllers
                 torlendoVicc.Aktiv = false;
                 _context.Entry(torlendoVicc).State = EntityState.Modified;
             }
-            
+
             else
                 _context.Viccek.Remove(torlendoVicc);
 
@@ -90,6 +90,40 @@ namespace ViccAdatbazis.Controllers
             return NoContent();
         }
 
-        //Like/Dislike
+        // Like
+        [Route("{id}/like")]
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PatchLike(int id)
+        {
+            var vicc = await _context.Viccek.FindAsync(id);
+            Console.WriteLine($"{vicc}");
+            if (vicc == null)
+            {
+                return NotFound();
+            }
+
+            vicc.Tetszik++;
+
+            _context.Entry(vicc).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        ///Dislike
+        [HttpPatch("{id}/dislike")]
+        public async Task<ActionResult> PatchDislike(int id)
+        {
+            var vicc = await _context.Viccek.FindAsync(id);
+            if (vicc == null)
+            {
+                return NotFound();
+            }
+
+            vicc.NemTetszik++;
+
+
+            _context.Entry(vicc).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
